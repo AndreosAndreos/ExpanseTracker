@@ -6,22 +6,37 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ExpanseTracker.Data;
+using ExpanseTracker.Models.Categories;
+using AutoMapper;
 
 namespace ExpanseTracker.Controllers
 {
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public CategoriesController(ApplicationDbContext context)
+        public CategoriesController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            this._mapper = mapper;
         }
 
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            var data = await _context.Categories.ToListAsync();
+
+            //var viewData = data.Select(q => new IndexVM
+            //{
+            //    Id = q.Id,
+            //    Name = q.Name,
+            //    Description = q.Description
+            //});
+
+            var viewData = _mapper.Map<List<IndexVM>>(data);
+
+            return View(viewData);
         }
 
         // GET: Categories/Details/5
