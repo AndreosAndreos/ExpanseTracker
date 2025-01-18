@@ -23,7 +23,7 @@ namespace ExpanseTracker.Models.Services
             return viewData;
         }
 
-        public async Task<T?> Get<T>(int id) where T : class
+        public async Task<T?> GetAsync<T>(int id) where T : class
         {
             var data = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
             if (data == null)
@@ -50,25 +50,25 @@ namespace ExpanseTracker.Models.Services
             _context.Update(category);
             await _context.SaveChangesAsync();
         }
-        public async Task Create(CategoryEditVM model)
+        public async Task Create(CategoryCreateVM model)
         {
             var category = _mapper.Map<Category>(model);
             _context.Add(category);
             await _context.SaveChangesAsync();
         }
-        private bool CategoryExists(int id)
+        public bool CategoryExists(int id)
         {
             return _context.Categories.Any(e => e.Id == id);
         }
 
-        private async Task<bool> CheckIfCategoryExists(string name)     // asynchronus method for checking if the entered value is already indatabase
+        public async Task<bool> CheckIfCategoryExists(string name)     // asynchronus method for checking if the entered value is already indatabase
         {
             var lowercase = name.ToLower();
             return await _context.Categories.AnyAsync(q => q.Name.ToLower().Equals(name));
             //return _context.Categories.Any(q => q.Name.Equals(categoryCreate.Name,StringComparison.InvariantCultureIgnoreCase));
         }
 
-        private async Task<bool> CheckIfCategoryExistsForEdit(CategoryEditVM categoryEditVM)        // checks if the entered Name in edit is not already in the database with diferent ID
+        public async Task<bool> CheckIfCategoryExistsForEdit(CategoryEditVM categoryEditVM)        // checks if the entered Name in edit is not already in the database with diferent ID
         {
             var lowercase = categoryEditVM.Name.ToLower();
             return await _context.Categories.AnyAsync(q => q.Name.ToLower().Equals(categoryEditVM.Name) && q.Id != categoryEditVM.Id);

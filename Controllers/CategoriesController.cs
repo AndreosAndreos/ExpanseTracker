@@ -8,24 +8,18 @@ using Microsoft.EntityFrameworkCore;
 using ExpanseTracker.Data;
 using ExpanseTracker.Models.Categories;
 using AutoMapper;
+using ExpanseTracker.Models.Services;
 
 namespace ExpanseTracker.Controllers
 {
-    public class CategoriesController : Controller
+    public class CategoriesController(ICategoriesService _categoriesService) : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
-
-        public CategoriesController(ApplicationDbContext context, IMapper mapper)
-        {
-            _context = context;
-            this._mapper = mapper;
-        }
+        //private readonly ICategoriesService _categoriesService = categoriesService;
 
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            var data = await _context.Categories.ToListAsync();
+            // Without auto mapping:
 
             //var viewData = data.Select(q => new IndexVM
             //{
@@ -34,7 +28,12 @@ namespace ExpanseTracker.Controllers
             //    Description = q.Description
             //});
 
-            var viewData = _mapper.Map<List<CategoryReadOnlyVM>>(data);
+            // with automapping:
+            //var data = await _context.Categories.ToListAsync();
+            //var viewData = _mapper.Map<List<CategoryReadOnlyVM>>(data);
+
+            // using services:
+            var viewData = await _categoriesService.GetAllCategoriesAsync();
 
             return View(viewData);
         }
@@ -47,15 +46,17 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
+            //var category = await _context.Categories.FirstOrDefaultAsync(m => m.Id == id);
+            
+            var category = await _categoriesService.GetAsync<CategoryReadOnlyVM>(id.Value);
+            
             if (category == null)
             {
                 return NotFound();
             }
 
             // automapping
-            var viewData = _mapper.Map<CategoryReadOnlyVM>(category);
+            //var viewData = _mapper.Map<CategoryReadOnlyVM>(category);
 
             // manual mapping
             //var data = new CategoryReadOnlyVM
@@ -65,7 +66,7 @@ namespace ExpanseTracker.Controllers
             //    Description = category.Description
             //};
 
-            return View(viewData);
+            return View(category);
         }
 
         // GET: Categories/Create
@@ -93,16 +94,19 @@ namespace ExpanseTracker.Controllers
             //    ModelState.AddModelError(nameof(categoryCreate.Name),"You cannot use this name! ");     // use nameof() so you're ready for the variable change
             //}
 
-            if(await CheckIfCategoryExists(categoryCreate.Name))
+            //if(await CheckIfCategoryExists(categoryCreate.Name))
+            //{
+            //    ModelState.AddModelError(nameof(categoryCreate.Name),"This category already exists in database");
+            //}
+
+            if(await _categoriesService.CheckIfCategoryExists(categoryCreate.Name))
             {
-                ModelState.AddModelError(nameof(categoryCreate.Name),"This category already exists in database");
+                ModelState.AddModelError(nameof(categoryCreate.Name), "This category already exists in database");
             }
 
             if (ModelState.IsValid)     // if validation from obove gives an error it will already be FALSE
             {
-                var category = _mapper.Map<Category>(categoryCreate);
-                _context.Add(category);
-                await _context.SaveChangesAsync();
+                await _categoriesService.Create(categoryCreate);
                 return RedirectToAction(nameof(Index));
             }
             return View(categoryCreate);
@@ -116,15 +120,15 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories.FindAsync(id);
-            
+            var category = await _categoriesService.GetAsync<CategoryEditVM>(id.Value);
+
             if (category == null)
             {
                 return NotFound();
             }
 
-            var viewData = _mapper.Map<CategoryEditVM>(category);
-            return View(viewData);
+            //var viewData = _mapper.Map<CategoryEditVM>(category);
+            return View(category);
         }
 
         // POST: Categories/Edit/5
@@ -139,7 +143,11 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
-            if (await CheckIfCategoryExistsForEdit(categoryEditVM))
+            //if (await CheckIfCategoryExistsForEdit(categoryEditVM))
+            //{
+            //    ModelState.AddModelError(nameof(categoryEditVM.Name), "This category already exists in database");
+            //}
+            if (await _categoriesService.CheckIfCategoryExistsForEdit(categoryEditVM))
             {
                 ModelState.AddModelError(nameof(categoryEditVM.Name), "This category already exists in database");
             }
@@ -148,13 +156,14 @@ namespace ExpanseTracker.Controllers
             {
                 try
                 {
-                    var category = _mapper.Map<Category>(categoryEditVM);
-                    _context.Update(category);
-                    await _context.SaveChangesAsync();
+                    //var category = _mapper.Map<Category>(categoryEditVM);
+                    //_context.Update(category);
+                    //await _context.SaveChangesAsync();
+                    await _categoriesService.Edit(categoryEditVM);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(categoryEditVM.Id))
+                    if (!_categoriesService.CategoryExists(categoryEditVM.Id))
                     {
                         return NotFound();
                     }
@@ -176,8 +185,8 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
+            //var category = await _context.Categories.FirstOrDefaultAsync(m => m.Id == id);
+            var category = await _categoriesService.GetAsync<CategoryReadOnlyVM>(id.Value);
             if (category == null)
             {
                 return NotFound();
@@ -191,14 +200,15 @@ namespace ExpanseTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            //var category = await _context.Categories.FindAsync(id);
 
-            if (category != null)
-            {
-                _context.Categories.Remove(category);
-            }
+            //if (category != null)
+            //{
+            //    _context.Categories.Remove(category);
+            //}
 
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
+            await _categoriesService.Delete(id);
             return RedirectToAction(nameof(Index));
         }
     }
