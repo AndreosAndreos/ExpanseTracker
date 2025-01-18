@@ -8,8 +8,10 @@ namespace ExpanseTracker.MappingProfiles
     {
         public AutoMapperProfile()
         {
-            CreateMap<Category, IndexVM>();
+            CreateMap<Category, CategoryReadOnlyVM>();
             //.ForMember(dest => dest.Days, opt => opt.MapFrom(src => src.NumberOfDays));
+            CreateMap<CategoryCreateVM, Category>();
+            CreateMap<CategoryEditVM, Category>().ReverseMap();
         }
     }
 }

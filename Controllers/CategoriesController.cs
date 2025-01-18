@@ -34,7 +34,7 @@ namespace ExpanseTracker.Controllers
             //    Description = q.Description
             //});
 
-            var viewData = _mapper.Map<List<IndexVM>>(data);
+            var viewData = _mapper.Map<List<CategoryReadOnlyVM>>(data);
 
             return View(viewData);
         }
@@ -54,7 +54,18 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
-            return View(category);
+            // automapping
+            var viewData = _mapper.Map<CategoryReadOnlyVM>(category);
+
+            // manual mapping
+            //var data = new CategoryReadOnlyVM
+            //{
+            //    Id = category.Id,
+            //    Name = category.Name,
+            //    Description = category.Description
+            //};
+
+            return View(viewData);
         }
 
         // GET: Categories/Create
@@ -68,15 +79,33 @@ namespace ExpanseTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description")] Category category)
+        
+        //public async Task<IActionResult> Create([Bind("Id,Name,Description")] Category category)
+
+        // when using mapping you can change the binding to the CreateViewModel binding you preapared for this action
+        public async Task<IActionResult> Create(CategoryCreateVM categoryCreate)
         {
-            if (ModelState.IsValid)
+
+            // adding own validation and error, it will add an error to the ModelState
+
+            //if(categoryCreate.Name.Contains("SomeName"))
+            //{
+            //    ModelState.AddModelError(nameof(categoryCreate.Name),"You cannot use this name! ");     // use nameof() so you're ready for the variable change
+            //}
+
+            if(await CheckIfCategoryExists(categoryCreate.Name))
             {
+                ModelState.AddModelError(nameof(categoryCreate.Name),"This category already exists in database");
+            }
+
+            if (ModelState.IsValid)     // if validation from obove gives an error it will already be FALSE
+            {
+                var category = _mapper.Map<Category>(categoryCreate);
                 _context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(category);
+            return View(categoryCreate);
         }
 
         // GET: Categories/Edit/5
@@ -88,11 +117,14 @@ namespace ExpanseTracker.Controllers
             }
 
             var category = await _context.Categories.FindAsync(id);
+            
             if (category == null)
             {
                 return NotFound();
             }
-            return View(category);
+
+            var viewData = _mapper.Map<CategoryEditVM>(category);
+            return View(viewData);
         }
 
         // POST: Categories/Edit/5
@@ -100,23 +132,29 @@ namespace ExpanseTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description")] Category category)
+        public async Task<IActionResult> Edit(int id, CategoryEditVM categoryEditVM)
         {
-            if (id != category.Id)
+            if (id != categoryEditVM.Id)
             {
                 return NotFound();
+            }
+
+            if (await CheckIfCategoryExistsForEdit(categoryEditVM))
+            {
+                ModelState.AddModelError(nameof(categoryEditVM.Name), "This category already exists in database");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var category = _mapper.Map<Category>(categoryEditVM);
                     _context.Update(category);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(category.Id))
+                    if (!CategoryExists(categoryEditVM.Id))
                     {
                         return NotFound();
                     }
@@ -127,7 +165,7 @@ namespace ExpanseTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(category);
+            return View(categoryEditVM);
         }
 
         // GET: Categories/Delete/5
@@ -154,6 +192,7 @@ namespace ExpanseTracker.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var category = await _context.Categories.FindAsync(id);
+
             if (category != null)
             {
                 _context.Categories.Remove(category);
@@ -161,11 +200,6 @@ namespace ExpanseTracker.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool CategoryExists(int id)
-        {
-            return _context.Categories.Any(e => e.Id == id);
         }
     }
 }
