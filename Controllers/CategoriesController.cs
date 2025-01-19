@@ -20,7 +20,6 @@ namespace ExpanseTracker.Controllers
         public async Task<IActionResult> Index()
         {
             // Without auto mapping:
-
             //var viewData = data.Select(q => new IndexVM
             //{
             //    Id = q.Id,
