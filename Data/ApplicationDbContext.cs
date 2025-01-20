@@ -27,7 +27,13 @@ namespace ExpanseTracker.Data
                     Name = "Admin",
                     NormalizedName = "ADMIN"
                 },
-                new IdentityRole { }
+                new IdentityRole 
+                {
+                    Id = "96910574-f9b8-4be8-a3ff-27e86906746e",
+                    Name = "Manager",
+                    NormalizedName = "MANAGER"
+                }
+
             );
 
             var hasher = new PasswordHasher<AppUser>();        // so the password being passed to the database will be saver as hashed
