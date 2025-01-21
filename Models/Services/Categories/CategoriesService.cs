@@ -3,7 +3,7 @@ using ExpanseTracker.Data;
 using ExpanseTracker.Models.Categories;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExpanseTracker.Models.Services
+namespace ExpanseTracker.Models.Services.Categories
 {
     public class CategoriesService : ICategoriesService
     {
@@ -12,8 +12,8 @@ namespace ExpanseTracker.Models.Services
 
         public CategoriesService(ApplicationDbContext context, IMapper mapper)
         {
-            this._context = context;
-            this._mapper = mapper;
+            _context = context;
+            _mapper = mapper;
         }
 
         public async Task<List<CategoryReadOnlyVM>> GetAllCategoriesAsync()

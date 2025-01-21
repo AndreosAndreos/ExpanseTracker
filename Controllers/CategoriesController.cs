@@ -8,10 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using ExpanseTracker.Data;
 using ExpanseTracker.Models.Categories;
 using AutoMapper;
-using ExpanseTracker.Models.Services;
+using ExpanseTracker.Models.Services.Categories;
+
 
 namespace ExpanseTracker.Controllers
 {
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager}")]
     public class CategoriesController(ICategoriesService _categoriesService) : Controller
     {
         //private readonly ICategoriesService _categoriesService = categoriesService;
@@ -186,6 +188,7 @@ namespace ExpanseTracker.Controllers
 
             //var category = await _context.Categories.FirstOrDefaultAsync(m => m.Id == id);
             var category = await _categoriesService.GetAsync<CategoryReadOnlyVM>(id.Value);
+
             if (category == null)
             {
                 return NotFound();

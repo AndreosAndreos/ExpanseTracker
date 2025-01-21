@@ -1,6 +1,6 @@
 ﻿using ExpanseTracker.Models.Categories;
 
-namespace ExpanseTracker.Models.Services
+namespace ExpanseTracker.Models.Services.Categories
 {
     public interface ICategoriesService
     {

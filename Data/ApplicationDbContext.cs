@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace ExpanseTracker.Data
 {
@@ -14,7 +15,8 @@ namespace ExpanseTracker.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<IdentityRole>().HasData(             // craeting roles in the database
+            
+            builder.Entity<IdentityRole>().HasData(             // craeting roles in the database (initialization of the database)
                 new IdentityRole 
                 {
                     Id = "5a3a3f9a-889b-47fe-98f5-15d876e93f7b",
@@ -53,16 +55,25 @@ namespace ExpanseTracker.Data
                 DateOfBirth=new DateOnly(1950,12,19)
             });
 
-            builder.Entity<IdentityUserRole<string>>().HasData(     //binding the user with a role
+            builder.Entity<IdentityUserRole<string>>().HasData(     //binding the user with a role (admin)
                 new IdentityUserRole<string>
                 {
                     RoleId = "0d319d52-8efa-41d3-a0e2-10aebf0551f8",
                     UserId = "d2f29953-2efe-4b26-9a6b-1824e9163511"
                 }
-                );
+            );
+
+            builder.Entity<Budget>()
+                .Property(b => b.Amount)
+                .HasPrecision(18, 2);
+
+            builder.Entity<Expense>()
+                .Property(e => e.Amount)
+                .HasPrecision(18, 2);
         }
 
         public DbSet<Category> Categories { get; set; }
-        //public DbSet<User> Users {  get; set; }
+        public DbSet<Budget> Budgets {  get; set; }
+        public DbSet<Expense> Expenses { get; set; }
     }
 }

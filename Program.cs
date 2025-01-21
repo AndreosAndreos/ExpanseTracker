@@ -1,5 +1,6 @@
 using ExpanseTracker.Data;
-using ExpanseTracker.Models.Services;
+using ExpanseTracker.Models.Services.Categories;
+using ExpanseTracker.Models.Services.Expenses;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -13,6 +14,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+builder.Services.AddScoped<IExpensesService, ExpenseService>();
 
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
