@@ -16,9 +16,11 @@
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Category is required.")]
+        public Category Category { get; set; }
         public int CategoryId { get; set; }
 
         [Required(ErrorMessage = "User ID is required.")]
+        public AppUser User { get; set; }
         public string UserId { get; set; }
     }
 }

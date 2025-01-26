@@ -5,14 +5,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpanseTracker.Models.Services.Expenses
 {
-    public class ExpenseService : IExpensesService
+    public class ExpenseService(ApplicationDbContext _context, IMapper _mapper, IHttpContextAccessor _contextAccessor, UserManager<AppUser> _userManager) : IExpensesService
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
-
         public async Task<List<ExpenseReadOnlyVM>> GetAllExpensesAnyc()
         {
-            var data = _context.Expenses.ToListAsync();
+            var data = await _context.Expenses.ToListAsync();
+            var viewData = _mapper.Map<List<ExpenseReadOnlyVM>>(data);
+            return viewData;
+        }
+
+        public async Task<List<ExpenseReadOnlyVM>> GetExpenseByIdAsync()
+        {
+            var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+
+            var data = await _context.Expenses.
+                Include(q => q.User).
+                Include(q => q.Category). 
+                Where(q => q.UserId == user.Id).
+                ToListAsync();
             var viewData = _mapper.Map<List<ExpenseReadOnlyVM>>(data);
             return viewData;
         }

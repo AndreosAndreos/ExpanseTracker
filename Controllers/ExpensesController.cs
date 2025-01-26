@@ -12,7 +12,8 @@ using ExpanseTracker.Models.Categories;
 
 namespace ExpanseTracker.Controllers
 {
-    public class ExpensesController(ExpenseService _expenseService) : Controller
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.User}")]
+    public class ExpensesController(IExpensesService _expenseService) : Controller
     {
         private readonly ApplicationDbContext _context;
                                                                                 // expense service injected so context not needed and ctor also not nedded
@@ -26,8 +27,23 @@ namespace ExpanseTracker.Controllers
         {
             //var applicationDbContext = _context.Expenses.Include(e => e.Category).Include(e => e.User);
             //return View(await applicationDbContext.ToListAsync());
-            var viewData = _expenseService.GetAllExpensesAnyc();
-            return View(viewData);
+
+            // Under this line: thas how you get all expanses: 
+
+            if (User.IsInRole(Roles.Admin))
+            {
+                var viewData = await _expenseService.GetAllExpensesAnyc();
+                return View(viewData);
+            }
+            else if (User.IsInRole(Roles.User))
+            {
+                var data = await _expenseService.GetExpenseByIdAsync();
+                return View(data);
+            }
+            else
+            {
+                return View();
+            }
         }
 
         // GET: Expenses/Details/5

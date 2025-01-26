@@ -9,6 +9,7 @@ namespace ExpanseTracker.Models.Services.Expenses
         Task Create(ExpenseCreateVM model);
         Task Delete(int id);
         Task Edit(ExpenseEditVM model);
+        Task<List<ExpenseReadOnlyVM>> GetExpenseByIdAsync();
         Task<T?> GetAsync<T>(int id) where T : class;
         bool ExpenseExists(int id);
     }

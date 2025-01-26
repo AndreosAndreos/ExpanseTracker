@@ -44,7 +44,7 @@
                                 </ul>
                             </li>
                         }
-                        else
+                        else if (User.IsInRole(Roles.User))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-light" asp-controller="Expenses" asp-action="Index">Expense</a>

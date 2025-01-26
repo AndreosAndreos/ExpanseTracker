@@ -5,10 +5,9 @@
         public decimal Amount { get; set; }
         public DateOnly Date { get; set; }
         public string Name { get; set; }
-        
-        [Required]
+        public Category Category { get; set; }
         public int CategoryId { get; set; }
-        [Required]
+        public AppUser User { get; set; }
         public string UserId { get; set; }
     }
 }

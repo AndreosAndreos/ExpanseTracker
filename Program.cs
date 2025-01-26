@@ -19,6 +19,8 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddScoped<IExpensesService, ExpenseService>();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true)

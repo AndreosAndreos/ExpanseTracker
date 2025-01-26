@@ -8,3 +8,5 @@ global using Microsoft.AspNetCore.Mvc.RazorPages;
 global using System.ComponentModel.DataAnnotations;
 global using ExpanseTracker.Commons;
 global using ExpanseTracker.Models.Services.Email;
+global using ExpanseTracker.Models.Services.Expenses;
+global using ExpanseTracker.Models.Expenses;
