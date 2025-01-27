@@ -9,11 +9,12 @@ using ExpanseTracker.Data;
 using ExpanseTracker.Models.Services.Expenses;
 using ExpanseTracker.Models.Expenses;
 using ExpanseTracker.Models.Categories;
+using Microsoft.AspNetCore.Identity;
 
 namespace ExpanseTracker.Controllers
 {
     [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.User}")]
-    public class ExpensesController(IExpensesService _expenseService) : Controller
+    public class ExpensesController(IExpensesService _expenseService, UserManager<AppUser> _userManager) : Controller
     {
         private readonly ApplicationDbContext _context;
                                                                                 // expense service injected so context not needed and ctor also not nedded
@@ -72,8 +73,20 @@ namespace ExpanseTracker.Controllers
         // GET: Expenses/Create
         public IActionResult Create()
         {
-            //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
-            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
+            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName");
+            
+            if (User.IsInRole(Roles.Admin))
+            {
+                ViewBag.UserId = new SelectList(_expenseService.GetUsers(), "Id", "UserName");
+            }
+            else
+            {
+                var currentUserId = _userManager.GetUserId(User);
+                ViewBag.CurrentUserId = currentUserId;
+            }
+
+            ViewBag.CategoryId = new SelectList(_expenseService.GetCategories(), "Id", "Name");
             return View();
         }
 
@@ -84,16 +97,34 @@ namespace ExpanseTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ExpenseCreateVM expenseCreate)
         {
+            //if (ModelState.IsValid)
+            //{
+            //    //_context.Add(expense);
+            //    //await _context.SaveChangesAsync();
+            //    //return RedirectToAction(nameof(Index));
+            //    await _expenseService.Create(expenseCreate);
+            //    return RedirectToAction(nameof(Index));
+            //}
+            //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", expenseCreate.CategoryId);
+            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", expenseCreate.UserId);
+            //return View(expenseCreate);
+
+            if (!User.IsInRole(Roles.Admin))
+            {
+                expenseCreate.UserId = _userManager.GetUserId(User);
+            }
+            if (User.IsInRole(Roles.Admin))
+            {
+                ViewBag.UserId = new SelectList(_expenseService.GetUsers(), "Id", "UserName", expenseCreate.UserId);
+            }
+            
+            ViewBag.CategoryId = new SelectList(_expenseService.GetCategories(), "Id", "Name", expenseCreate.CategoryId);
+
             if (ModelState.IsValid)
             {
-                //_context.Add(expense);
-                //await _context.SaveChangesAsync();
-                //return RedirectToAction(nameof(Index));
                 await _expenseService.Create(expenseCreate);
                 return RedirectToAction(nameof(Index));
-            }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", expenseCreate.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", expenseCreate.UserId);
+            }        
             return View(expenseCreate);
         }
 
@@ -111,10 +142,23 @@ namespace ExpanseTracker.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", expense.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", expense.UserId);
+            
+            if (!User.IsInRole(Roles.Admin))
+            {
+                expense.UserId = _userManager.GetUserId(User);
+            }
+            if (User.IsInRole(Roles.Admin))
+            {
+                ViewBag.UserId = new SelectList(_expenseService.GetUsers(), "Id", "UserName", expense.UserId);
+            }
+
+            ViewBag.CategoryId = new SelectList(_expenseService.GetCategories(), "Id", "Name", expense.CategoryId);
+            //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", expense.CategoryId);
+            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName", expense.UserId);
+
             return View(expense);
         }
+
 
         // POST: Expenses/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.

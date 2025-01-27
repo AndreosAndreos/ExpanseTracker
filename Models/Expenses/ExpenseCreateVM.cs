@@ -5,6 +5,7 @@
         [Required(ErrorMessage = "Amount is required.")]
         [Range(0.01, 1000000, ErrorMessage = "Amount must be between 0.01 and 1,000,000.")]
         public decimal Amount { get; set; }
+        
         [Required(ErrorMessage = "Date is required.")]
         [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
         //[DateInPastOrToday(ErrorMessage = "Date cannot be in the future.")]
@@ -17,10 +18,10 @@
 
         [Required(ErrorMessage = "Category is required.")]
         public int CategoryId { get; set; }
-        public Category Category { get; set; }
+        //public Category Category { get; set; }
 
         [Required(ErrorMessage = "User ID is required.")]
         public string UserId { get; set; }
-        public AppUser User { get; set; }
+        //public AppUser User { get; set; }
     }
 }

@@ -12,5 +12,7 @@ namespace ExpanseTracker.Models.Services.Expenses
         Task<List<ExpenseReadOnlyVM>> GetExpenseByIdAsync();
         Task<T?> GetAsync<T>(int id) where T : class;
         bool ExpenseExists(int id);
+        public IEnumerable<AppUser> GetUsers();
+        public IEnumerable<Category> GetCategories();
     }
 }
