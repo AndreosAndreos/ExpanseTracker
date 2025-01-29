@@ -13,7 +13,7 @@
         [Required(ErrorMessage = "Name is required.")]
         [StringLength(100, MinimumLength = 4, ErrorMessage = "Name must be between 4 and 100 characters long.")]
         [RegularExpression(@"^[a-zA-Z0-9\s]*$", ErrorMessage = "Name can only contain letters, numbers, and spaces.")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Required(ErrorMessage = "Category is required.")]
         //public Category Category { get; set; }
@@ -21,6 +21,6 @@
 
         [Required(ErrorMessage = "User ID is required.")]
         //public AppUser User { get; set; }
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
     }
 }

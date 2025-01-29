@@ -146,6 +146,7 @@ namespace ExpanseTracker.Controllers
             if (!User.IsInRole(Roles.Admin))
             {
                 expense.UserId = _userManager.GetUserId(User);
+                ViewBag.CurrentUserId = expense.UserId;
             }
             if (User.IsInRole(Roles.Admin))
             {
