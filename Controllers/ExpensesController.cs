@@ -172,6 +172,17 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
+            if (!User.IsInRole(Roles.Admin))
+            {
+                expense.UserId = _userManager.GetUserId(User);
+            }
+            if (User.IsInRole(Roles.Admin))
+            {
+                ViewBag.UserId = new SelectList(_expenseService.GetUsers(), "Id", "UserName", expense.UserId);
+            }
+
+            ViewBag.CategoryId = new SelectList(_expenseService.GetCategories(), "Id", "Name", expense.CategoryId);
+
             if (ModelState.IsValid)
             {
                 try
@@ -193,8 +204,9 @@ namespace ExpanseTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", expense.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", expense.UserId);
+            //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", expense.CategoryId);
+            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", expense.UserId);
+
             return View(expense);
         }
 

@@ -74,10 +74,7 @@ namespace ExpanseTracker.Models.Services.Expenses
 
         public async Task Edit(ExpenseEditVM model)
         {
-            //var expense = _mapper.Map<Expense>(model);
-            //_context.Update(expense);
-            //await _context.SaveChangesAsync();
-            
+
             var expense = await _context.Expenses
                 .Include(e => e.Category)
                 .Include(e => e.User)
@@ -101,7 +98,7 @@ namespace ExpanseTracker.Models.Services.Expenses
                 }
             }
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == model.UserId);
+            var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
             if (user != null)
             {
                 expense.User = user;
@@ -119,7 +116,6 @@ namespace ExpanseTracker.Models.Services.Expenses
         public IEnumerable<Category> GetCategories()
         {
             var categories = _context.Categories.ToList();
-            Console.WriteLine(categories.Count);
             return categories;
         }
 
