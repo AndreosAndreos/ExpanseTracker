@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ExpanseTracker.Data;
+using ExpanseTracker.Models.Budgets;
 using ExpanseTracker.Models.Categories;
 using ExpanseTracker.Models.Expenses;
 
@@ -14,16 +15,8 @@ namespace ExpanseTracker.MappingProfiles
             CreateMap<CategoryCreateVM, Category>();
             CreateMap<CategoryEditVM, Category>().ReverseMap();
 
-            //CreateMap<Expense, ExpenseReadOnlyVM>()
-            //    .ForMember(dest => dest.Date, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.Date)));
-
-            //CreateMap<ExpenseCreateVM, Expense>()
-            //    .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date.ToDateTime(TimeOnly.MinValue)));
-
-            //CreateMap<ExpenseEditVM, Expense>()
-            //    .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date.ToDateTime(TimeOnly.MinValue)))
-            //    .ReverseMap()
-            //    .ForMember(dest => dest.Date, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.Date)));
+            CreateMap<Budget, BudgetReadOnlyVM>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.User.Id));
             
             CreateMap<Expense, ExpenseReadOnlyVM>()
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.Date)))
