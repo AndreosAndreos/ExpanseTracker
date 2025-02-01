@@ -17,7 +17,12 @@ namespace ExpanseTracker.MappingProfiles
 
             CreateMap<Budget, BudgetReadOnlyVM>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.User.Id));
-            
+            CreateMap<Budget,BudgetCreateVM>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.User.Id));
+            CreateMap<Budget,BudgetEditVM>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.User.Id))
+                .ReverseMap();
+
             CreateMap<Expense, ExpenseReadOnlyVM>()
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.Date)))
                 .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.Category.Id))

@@ -1,28 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using ExpanseTracker.Data;
-
-namespace ExpanseTracker.Controllers
+﻿namespace ExpanseTracker.Controllers
 {
-    public class BudgetsController : Controller
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Manager},{Roles.User}")]
+    public class BudgetsController(IBudgetsServices _budgetsServices, UserManager<AppUser> _userManager) : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public BudgetsController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
 
         // GET: Budgets
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Budgets.Include(b => b.User);
-            return View(await applicationDbContext.ToListAsync());
+            if (User.IsInRole(Roles.Admin))
+            {
+                var viewData = await _budgetsServices.GetAllBudgetsAsync();
+                return View(viewData);
+            }
+            else if (User.IsInRole(Roles.User))
+            {
+                var data = await _budgetsServices.GetBudgetByIdAsync();
+                return View(data);
+            }
+            else
+            {
+                return View();
+            }
         }
 
         // GET: Budgets/Details/5
@@ -33,9 +32,8 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
-            var budget = await _context.Budgets
-                .Include(b => b.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var budget = await _budgetsServices.GetAsync<BudgetReadOnlyVM>(id.Value);
+
             if (budget == null)
             {
                 return NotFound();
@@ -47,7 +45,15 @@ namespace ExpanseTracker.Controllers
         // GET: Budgets/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            if (User.IsInRole(Roles.Admin))
+            {
+                ViewBag.UserId = new SelectList(_budgetsServices.GetUsers(), "Id", "UserName");
+            }
+            else
+            {
+                var currentUserId = _userManager.GetUserId(User);
+                ViewBag.CurrentUserId = currentUserId;
+            }
             return View();
         }
 
@@ -56,15 +62,22 @@ namespace ExpanseTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Amount,Month,UserId,Id")] Budget budget)
+        public async Task<IActionResult> Create(BudgetCreateVM budget)
         {
+            if (!User.IsInRole(Roles.Admin))
+            {
+                budget.UserId = _userManager.GetUserId(User);
+            }
+            if (User.IsInRole(Roles.Admin))
+            {
+                ViewBag.UserId = new SelectList(_budgetsServices.GetUsers(), "Id", "UserName", budget.UserId);
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(budget);
-                await _context.SaveChangesAsync();
+                await _budgetsServices.Create(budget);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", budget.UserId);
             return View(budget);
         }
 
@@ -76,12 +89,22 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
-            var budget = await _context.Budgets.FindAsync(id);
+            var budget = await _budgetsServices.GetAsync<BudgetEditVM>(id.Value);
             if (budget == null)
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", budget.UserId);
+
+            if (!User.IsInRole(Roles.Admin))
+            {
+                budget.UserId = _userManager.GetUserId(User);
+                ViewBag.CurrentUserId = budget.UserId;
+            }
+            if (User.IsInRole(Roles.Admin))
+            {
+                ViewBag.UserId = new SelectList(_budgetsServices.GetUsers(), "Id", "UserName", budget.UserId);
+            }
+
             return View(budget);
         }
 
@@ -90,23 +113,31 @@ namespace ExpanseTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Amount,Month,UserId,Id")] Budget budget)
+        public async Task<IActionResult> Edit(int id, BudgetEditVM budget)
         {
             if (id != budget.Id)
             {
                 return NotFound();
             }
 
+            if (!User.IsInRole(Roles.Admin))
+            {
+                budget.UserId = _userManager.GetUserId(User);
+            }
+            if (User.IsInRole(Roles.Admin))
+            {
+                ViewBag.UserId = new SelectList(_budgetsServices.GetUsers(), "Id", "UserName", budget.UserId);
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(budget);
-                    await _context.SaveChangesAsync();
+                    await _budgetsServices.Edit(budget);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BudgetExists(budget.Id))
+                    if (!_budgetsServices.BudgetExists(budget.Id))
                     {
                         return NotFound();
                     }
@@ -117,7 +148,7 @@ namespace ExpanseTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", budget.UserId);
+            
             return View(budget);
         }
 
@@ -129,9 +160,8 @@ namespace ExpanseTracker.Controllers
                 return NotFound();
             }
 
-            var budget = await _context.Budgets
-                .Include(b => b.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var budget = await _budgetsServices.GetAsync<BudgetReadOnlyVM>(id.Value);
+
             if (budget == null)
             {
                 return NotFound();
@@ -145,19 +175,8 @@ namespace ExpanseTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var budget = await _context.Budgets.FindAsync(id);
-            if (budget != null)
-            {
-                _context.Budgets.Remove(budget);
-            }
-
-            await _context.SaveChangesAsync();
+            await _budgetsServices.Delete(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool BudgetExists(int id)
-        {
-            return _context.Budgets.Any(e => e.Id == id);
         }
     }
 }

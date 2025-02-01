@@ -1,4 +1,4 @@
-﻿@model ExpanseTracker.Data.Budget
+﻿@model BudgetCreateVM
 
 @{
     ViewData["Title"] = "Create";
@@ -22,10 +22,17 @@
                 <input asp-for="Month" class="form-control" />
                 <span asp-validation-for="Month" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.UserId"></select>
-            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="form-group">
+                    <label asp-for="UserId" class="control-label"></label>
+                    <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
+                </div>
+            }
+            else
+            {
+                <input type="hidden" asp-for="UserId" value="@ViewBag.CurrentUserId" />
+            }
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

@@ -6,7 +6,7 @@ namespace ExpanseTracker.Models.Services.Budget
 {
     public class BudgetsServices(ApplicationDbContext _context, IMapper _mapper, IHttpContextAccessor _contextAccessor, UserManager<AppUser> _userManager) : IBudgetsServices
     {
-        public async Task<List<BudgetReadOnlyVM>> GetAllBudgetsAnyc()
+        public async Task<List<BudgetReadOnlyVM>> GetAllBudgetsAsync()
         {
             var data = await _context.Budgets
                 .Include(e => e.User)
@@ -53,7 +53,7 @@ namespace ExpanseTracker.Models.Services.Budget
 
         public async Task Create(BudgetCreateVM model)
         {
-            var budget = new Budget
+            var budget = new ExpanseTracker.Data.Budget
             {
                 Amount = model.Amount,
                 Month = model.Month,
@@ -64,6 +64,30 @@ namespace ExpanseTracker.Models.Services.Budget
             await _context.SaveChangesAsync();
         }
 
+        public async Task Edit(BudgetEditVM model)
+        {
+
+            var budget = await _context.Budgets
+                .Include(e => e.User)
+                .FirstOrDefaultAsync(x => x.Id == model.Id);
+
+            if (budget == null)
+            {
+                throw new ArgumentNullException($"Budget with ID {model.Id} not found.");
+            }
+
+            budget.Amount = model.Amount;
+            budget.Month = model.Month;
+
+            var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+            if (user != null)
+            {
+                budget.User = user;
+            }
+
+            _context.Update(budget);
+            await _context.SaveChangesAsync();
+        }
 
         public bool BudgetExists(int id)
         {

@@ -142,7 +142,7 @@ namespace ExpanseTracker.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Budgets");
+                    b.ToTable("Budgets", (string)null);
                 });
 
             modelBuilder.Entity("ExpanseTracker.Data.Category", b =>
@@ -163,7 +163,7 @@ namespace ExpanseTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("ExpanseTracker.Data.Expense", b =>
@@ -198,7 +198,7 @@ namespace ExpanseTracker.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Expenses");
+                    b.ToTable("Expenses", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

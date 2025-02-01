@@ -21,6 +21,8 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddScoped<IExpensesService, ExpenseService>();
 
+builder.Services.AddScoped<IBudgetsServices, BudgetsServices>();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());

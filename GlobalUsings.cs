@@ -10,3 +10,7 @@ global using ExpanseTracker.Commons;
 global using ExpanseTracker.Models.Services.Email;
 global using ExpanseTracker.Models.Services.Expenses;
 global using ExpanseTracker.Models.Expenses;
+global using ExpanseTracker.Models.Budgets;
+global using Microsoft.AspNetCore.Mvc.Rendering;
+global using Microsoft.EntityFrameworkCore;
+global using ExpanseTracker.Models.Services.Budget;
